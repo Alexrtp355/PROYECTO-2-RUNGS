@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RUNGS — Temario IEC 61131-3</title>
+  <style>
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #080d1a;
+  --panel:   #0c1220;
+  --panel2:  #0f1830;
+  --border:  #1a2d50;
+  --border2: #243a60;
+  --text:    #c0d0e8;
+  --textdim: #4a6a8a;
+  --bright:  #e8f0ff;
+  --cyan:    #00c8f0;
+  --green:   #00e870;
+  --yellow:  #f0c030;
+  --orange:  #ff8820;
+  --red:     #ff3040;
+  --purple:  #a060ff;
+  --font:    'Courier New', Courier, monospace;
+  --sidebar: 220px;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── TOP BAR ─────────────────────────────────────────────── */
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  height: 48px;
+  background: var(--panel2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo { font-size: 16px; font-weight: bold; color: var(--cyan); letter-spacing: 3px; }
+.logo span { font-size: 10px; color: var(--textdim); margin-left: 6px; letter-spacing: 1px; }
+
+.tb-back {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 11px;
+  padding: 5px 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  text-decoration: none;
+  display: inline-block;
+}
+.tb-back:hover { background: var(--border2); color: var(--bright); }
+
+.topbar-title {
+  flex: 1;
+  font-size: 12px;
+  color: var(--textdim);
+  letter-spacing: 2px;
+}
+
+.badge {
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  border: 1px solid currentColor;
+}
+.badge.n1 { color: var(--cyan);   border-color: var(--cyan);   }
+.badge.n2 { color: var(--green);  border-color: var(--green);  }
+.badge.n3 { color: var(--purple); border-color: var(--purple); }
+.badge.n4 { color: var(--yellow); border-color: var(--yellow); }
+.badge.au { color: var(--orange); border-color: var(--orange); }
+
+/* ── LAYOUT ──────────────────────────────────────────────── */
+#layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+#sidebar {
+  width: var(--sidebar);
+  flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px 0;
+}
+
+.nav-section { margin-bottom: 4px; }
+
+.nav-level {
+  font-size: 9px;
+  letter-spacing: 2px;
+  padding: 8px 14px 4px;
+  color: var(--textdim);
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.nav-level:first-child { border-top: none; margin-top: 0; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text);
+  border-left: 3px solid transparent;
+  transition: all .12s;
+  border-radius: 0;
+  background: none;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  width: 100%;
+  text-align: left;
+  font-family: var(--font);
+}
+.nav-item:hover  { background: var(--border); color: var(--bright); }
+.nav-item.active { background: #001830; border-left-color: var(--cyan); color: var(--cyan); }
+.nav-item.active.g { border-left-color: var(--green);  color: var(--green);  background: #001a10; }
+.nav-item.active.p { border-left-color: var(--purple); color: var(--purple); background: #0d0820; }
+.nav-item.active.y { border-left-color: var(--yellow); color: var(--yellow); background: #181200; }
+.nav-item.active.o { border-left-color: var(--orange); color: var(--orange); background: #180800; }
+
+.nav-sym {
+  font-size: 10px;
+  min-width: 36px;
+  text-align: center;
+  color: var(--textdim);
+  letter-spacing: -1px;
+}
+
+/* ── CONTENT ─────────────────────────────────────────────── */
+#content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 36px;
+  max-width: 860px;
+}
+
+/* Section pages */
+.section-page { display: none; }
+.section-page.active { display: block; }
+
+/* Section header */
+.section-title {
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.section-subtitle {
+  font-size: 12px;
+  color: var(--textdim);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+/* Level badge in section header */
+.level-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid;
+  margin-bottom: 16px;
+}
+
+/* ── ELEMENT CARD ────────────────────────────────────────── */
+.el-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.el-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel2);
+}
+
+.el-card-sym {
+  font-size: 14px;
+  letter-spacing: -1px;
+  color: var(--bright);
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  padding: 5px 12px;
+  border-radius: 4px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.el-card-title { font-size: 14px; font-weight: bold; color: var(--bright); }
+.el-card-sub   { font-size: 10px; color: var(--textdim); margin-top: 2px; letter-spacing: 1px; }
+
+.el-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+
+.el-block {
+  background: var(--panel);
+  padding: 14px 18px;
+}
+.el-block-title {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--textdim);
+  margin-bottom: 7px;
+}
+.el-block p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+/* Full-width block */
+.el-block.full { grid-column: 1 / -1; }
+
+/* SVG diagram container */
+.el-diagram {
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
+}
+
+/* Truth / state table */
+.el-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.el-table th {
+  background: var(--panel2);
+  color: var(--textdim);
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.el-table td {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  text-align: center;
+  font-family: var(--font);
+}
+.el-table .on  { color: var(--green);  }
+.el-table .off { color: var(--textdim); }
+
+/* Tip / warning box */
+.tip-box {
+  display: flex;
+  gap: 10px;
+  background: #001020;
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--cyan);
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.tip-box.warn { border-left-color: var(--yellow); background: #181000; }
+.tip-box.danger { border-left-color: var(--red); background: #180008; }
+.tip-icon { flex-shrink: 0; font-size: 14px; }
+
+/* Practice button */
+.btn-practice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-family: var(--font);
+  font-size: 11px;
+  padding: 6px 14px;
+  cursor: pointer;
+  border-radius: 3px;
+  text-decoration: none;
+  margin-top: 12px;
+  transition: all .15s;
+}
+.btn-practice:hover { background: #001830; }
+
+/* ── AUTOMATISMOS SECTION ─────────────────────────────────── */
+.auto-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.auto-card-head {
+  padding: 14px 20px;
+  background: var(--panel2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.auto-number {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--border2);
+  line-height: 1;
+}
+.auto-card-head h3 { font-size: 14px; color: var(--bright); }
+.auto-card-head p  { font-size: 10px; color: var(--textdim); margin-top: 2px; }
+.auto-body { padding: 16px 20px; }
+.auto-body p { font-size: 12px; line-height: 1.7; color: var(--text); margin-bottom: 10px; }
+.auto-steps {
+  list-style: none;
+  counter-reset: step;
+}
+.auto-steps li {
+  counter-increment: step;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.auto-steps li::before {
+  content: counter(step);
+  background: var(--border2);
+  color: var(--bright);
+  font-size: 9px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── INTRO PAGE ──────────────────────────────────────────── */
+.intro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+.intro-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+  display: block;
+}
+.intro-card:hover { border-color: var(--cyan); background: #001020; }
+.intro-card-num { font-size: 28px; font-weight: bold; color: var(--border2); margin-bottom: 6px; }
+.intro-card h3  { font-size: 13px; color: var(--bright); margin-bottom: 4px; }
+.intro-card p   { font-size: 11px; color: var(--textdim); line-height: 1.5; }
+
+/* ── SCROLLBAR ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--panel); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── SVG ELEMENTS ────────────────────────────────────────── */
+svg text { font-family: 'Courier New', monospace; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">RUNGS <span>TEMARIO</span></div>
+  <a href="index.html" class="tb-back">&#8592; Volver al Simulador</a>
+  <div class="topbar-title">IEC 61131-3 — Programación Ladder</div>
+</div>
+
+<div id="layout">
+
+<!-- ── SIDEBAR ────────────────────────────────────────────── -->
+<nav id="sidebar">
+
+  <div class="nav-level">INICIO</div>
+  <button class="nav-item active" data-page="intro">
+    <span class="nav-sym">&#8962;</span> Presentación
+  </button>
+
+  <div class="nav-level">NIVEL 1 — BÁSICO</div>
+  <button class="nav-item" data-page="que-es">
+    <span class="nav-sym">?</span> ¿Qué es Ladder?
+  </button>
+  <button class="nav-item" data-page="no">
+    <span class="nav-sym" style="color:#00c8f0">&#x2014;| |&#x2014;</span> Contacto NO
+  </button>
+  <button class="nav-item" data-page="nc">
+    <span class="nav-sym" style="color:#f0c030">&#x2014;|/|&#x2014;</span> Contacto NC
+  </button>
+  <button class="nav-item" data-page="coil">
+    <span class="nav-sym" style="color:#00c8f0">&#x2014;( )&#x2014;</span> Bobina COIL
+  </button>
+
+  <div class="nav-level">NIVEL 2 — COMBINATORIA</div>
+  <button class="nav-item" data-page="serie">
+    <span class="nav-sym" style="color:#00e870">AND</span> Contactos en Serie
+  </button>
+  <button class="nav-item" data-page="paralelo">
+    <span class="nav-sym" style="color:#00e870">OR</span> Contactos en Paralelo
+  </button>
+  <button class="nav-item" data-page="set-rst">
+    <span class="nav-sym" style="color:#00e870">&#x2014;(S)&#x2014;</span> SET / RESET
+  </button>
+  <button class="nav-item" data-page="flancos">
+    <span class="nav-sym" style="color:#ff8820">P / N</span> Flancos P y N
+  </button>
+
+  <div class="nav-level">NIVEL 3 — TEMPORIZADORES</div>
+  <button class="nav-item" data-page="ton">
+    <span class="nav-sym" style="color:#a060ff">TON</span> On-Delay
+  </button>
+  <button class="nav-item" data-page="tof">
+    <span class="nav-sym" style="color:#a060ff">TOF</span> Off-Delay
+  </button>
+  <button class="nav-item" data-page="tp">
+    <span class="nav-sym" style="color:#a060ff">TP</span> Pulso
+  </button>
+
+  <div class="nav-level">NIVEL 4 — CONTADORES</div>
+  <button class="nav-item" data-page="ctu">
+    <span class="nav-sym" style="color:#f0c030">CTU</span> Count Up
+  </button>
+  <button class="nav-item" data-page="ctd">
+    <span class="nav-sym" style="color:#f0c030">CTD</span> Count Down
+  </button>
+  <button class="nav-item" data-page="ctud">
+    <span class="nav-sym" style="color:#f0c030">CTUD</span> Up/Down
+  </button>
+
+  <div class="nav-level">AUTOMATISMOS</div>
+  <button class="nav-item" data-page="auto">
+    <span class="nav-sym" style="color:#ff8820">&#9881;</span> Patrones comunes
+  </button>
+
+</nav>
+
+<!-- ── CONTENT ─────────────────────────────────────────────── -->
+<div id="content">
+
+<!-- ════════════════════════════════════════════════════════════
+     INTRO
+════════════════════════════════════════════════════════════ -->
+<div class="section-page active" id="page-intro">
+  <div class="section-title" style="color:var(--cyan)">Bienvenido al Temario</div>
+  <div class="section-subtitle">
+    Este temario cubre la programación en lenguaje Ladder según la norma IEC 61131-3,
+    desde los conceptos más básicos hasta automatismos reales. Cada sección incluye
+    explicación, tabla de verdad o cronograma, y ejemplos prácticos.
+  </div>
+  <div class="intro-grid">
+    <a class="intro-card" onclick="showPage('que-es')">
+      <div class="intro-card-num" style="color:#243a60">N1</div>
+      <h3>&#128218; Nivel 1 — Básico</h3>
+      <p>Qué es el Ladder, cómo leer un rung, contacto NO, contacto NC y bobina de salida.</p>
+    </a>
+    <a class="intro-card" onclick="showPage('serie')">
+      <div class="intro-card-num" style="color:#243a60">N2</div>
+      <h3 style="color:#00e870">&#9889; Nivel 2 — Combinatoria</h3>
+      <p>Serie (AND), paralelo (OR), enclavamiento SET/RESET y detección de flancos.</p>
+    </a>
+    <a class="intro-card" onclick="showPage('ton')">
+      <div class="intro-card-num" style="color:#243a60">N3</div>
+      <h3 style="color:#a060ff">&#9200; Nivel 3 — Temporizadores</h3>
+      <p>TON retardo de conexión, TOF retardo de desconexión y TP pulso de duración fija.</p>
+    </a>
+    <a class="intro-card" onclick="showPage('ctu')">
+      <div class="intro-card-num" style="color:#243a60">N4</div>
+      <h3 style="color:#f0c030">&#128290; Nivel 4 — Contadores</h3>
+      <p>CTU ascendente, CTD descendente y CTUD bidireccional con ejemplos de producción.</p>
+    </a>
+  </div>
+  <a class="intro-card" onclick="showPage('auto')" style="background:var(--panel);border:1px solid #ff8820;padding:16px;border-radius:6px;display:block;text-decoration:none;cursor:pointer;">
+    <div class="intro-card-num" style="color:#402010">AU</div>
+    <h3 style="color:#ff8820">&#9881; Automatismos Típicos</h3>
+    <p style="color:var(--textdim);font-size:11px;line-height:1.5;">Enclavamiento, motor con protecciones, secuencia temporizada, semáforo y conteo de producción.</p>
+  </a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     QUÉ ES LADDER
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-que-es">
+  <span class="level-pill" style="color:var(--cyan);border-color:var(--cyan);">NIVEL 1 — BÁSICO</span>
+  <div class="section-title" style="color:var(--cyan)">¿Qué es el Ladder Diagram?</div>
+  <div class="section-subtitle">El lenguaje de programación industrial más extendido, nacido del cableado eléctrico.</div>
+
+  <div class="el-card">
+    <div class="el-card-head">
+      <div>
+        <div class="el-card-title">Origen del Ladder</div>
+        <div class="el-card-sub">DEL RELÉ AL SOFTWARE</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block full">
+        <p>El Ladder (escalera) nació como representación gráfica del cableado de armarios con relés electromagnéticos. Los ingenieros necesitaban documentar los circuitos de control y decidieron dibujarlo como si fuera un circuito eléctrico visto desde arriba: dos raíles verticales (L1 y L2) con contactos y bobinas en horizontal, como los peldaños de una escalera.</p>
+        <p style="margin-top:10px">Cuando llegaron los PLCs (Controladores Lógicos Programables) en los años 70, se adoptó este mismo lenguaje para que los electricistas pudieran programar sin necesidad de aprender lenguajes de texto. Hoy sigue siendo el lenguaje más usado en automatización industrial.</p>
+        <div class="el-diagram">
+          <svg width="480" height="100" viewBox="0 0 480 100">
+            <!-- Rails -->
+            <line x1="40" y1="10" x2="40" y2="90" stroke="#1e3a5a" stroke-width="3"/>
+            <line x1="440" y1="10" x2="440" y2="90" stroke="#1e3a5a" stroke-width="3"/>
+            <text x="40" y="8" fill="#00c8f0" font-size="9" text-anchor="middle">L1</text>
+            <text x="440" y="8" fill="#4a6a8a" font-size="9" text-anchor="middle">L2</text>
+            <!-- Wire -->
+            <line x1="40" y1="50" x2="150" y2="50" stroke="#162840" stroke-width="2"/>
+            <line x1="200" y1="50" x2="280" y2="50" stroke="#162840" stroke-width="2"/>
+            <line x1="330" y1="50" x2="390" y2="50" stroke="#162840" stroke-width="2"/>
+            <line x1="420" y1="50" x2="440" y2="50" stroke="#162840" stroke-width="2"/>
+            <!-- Contact NO -->
+            <line x1="155" y1="38" x2="155" y2="62" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="195" y1="38" x2="195" y2="62" stroke="#1e3a5a" stroke-width="2"/>
+            <text x="175" y="80" fill="#4a6a8a" font-size="9" text-anchor="middle">CONTACTO</text>
+            <!-- Coil -->
+            <circle cx="405" cy="50" r="15" fill="none" stroke="#1e3a5a" stroke-width="2"/>
+            <text x="405" y="80" fill="#4a6a8a" font-size="9" text-anchor="middle">BOBINA</text>
+            <!-- Contact NC -->
+            <line x1="285" y1="38" x2="285" y2="62" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="325" y1="38" x2="325" y2="62" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="278" y1="60" x2="332" y2="40" stroke="#1e3a5a" stroke-width="2"/>
+            <text x="305" y="80" fill="#4a6a8a" font-size="9" text-anchor="middle">CONTACTO NC</text>
+            <!-- Arrows -->
+            <text x="80" y="46" fill="#4a6a8a" font-size="9">CORRIENTE →</text>
+          </svg>
+        </div>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">ESTRUCTURA BÁSICA</div>
+        <p><strong style="color:var(--bright)">L1 (barra izquierda):</strong> Siempre energizada. Es el polo positivo / fase del sistema.</p>
+        <p style="margin-top:8px"><strong style="color:var(--bright)">L2 (barra derecha):</strong> Neutro o retorno. La corriente "busca" llegar aquí.</p>
+        <p style="margin-top:8px"><strong style="color:var(--bright)">Rung:</strong> Cada línea horizontal entre L1 y L2. Contiene la lógica de una condición→acción.</p>
+        <p style="margin-top:8px"><strong style="color:var(--bright)">Scan:</strong> El PLC evalúa TODOS los rungs de arriba a abajo, una y otra vez, cíclicamente.</p>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">CÓMO LEER UN RUNG</div>
+        <p>Lee cada rung como una frase lógica:</p>
+        <p style="margin-top:8px;color:var(--cyan)">"SI [contacto A] Y [contacto B] ENTONCES activar [bobina C]"</p>
+        <p style="margin-top:8px">Los contactos a la izquierda son las <strong style="color:var(--bright)">condiciones</strong>. La bobina a la derecha es la <strong style="color:var(--bright)">acción</strong>. La corriente fluye de izquierda a derecha si todas las condiciones se cumplen.</p>
+        <div class="tip-box" style="margin-top:12px">
+          <span class="tip-icon">&#128161;</span>
+          <span>El PLC no piensa: solo evalúa la lógica que tú programas. Si la lógica está bien, el control funciona.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar en el simulador</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     CONTACTO NO
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-no">
+  <span class="level-pill" style="color:var(--cyan);border-color:var(--cyan);">NIVEL 1 — BÁSICO</span>
+  <div class="section-title" style="color:var(--cyan)">Contacto NA — Normalmente Abierto</div>
+  <div class="section-subtitle">La instrucción de entrada más común: cierra el circuito cuando su variable vale 1.</div>
+
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--cyan)">&#x2014;| |&#x2014;</div>
+      <div>
+        <div class="el-card-title">NO Contact / XIC (Examine If Closed)</div>
+        <div class="el-card-sub">IEC 61131-3 · CONTACTO NORMALMENTE ABIERTO</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">DEFINICIÓN</div>
+        <div class="el-diagram">
+          <svg width="200" height="70" viewBox="0 0 200 70">
+            <line x1="0" y1="35" x2="70" y2="35" stroke="#00e870" stroke-width="2"/>
+            <line x1="80" y1="20" x2="80" y2="50" stroke="#00e870" stroke-width="2.5"/>
+            <line x1="120" y1="20" x2="120" y2="50" stroke="#00e870" stroke-width="2.5"/>
+            <line x1="130" y1="35" x2="200" y2="35" stroke="#00e870" stroke-width="2"/>
+            <text x="100" y="65" fill="#00c8f0" font-size="10" text-anchor="middle">TAG = 1 → CONDUCE</text>
+          </svg>
+        </div>
+        <p>Conduce corriente solo cuando su variable (tag) vale <strong style="color:var(--green)">1 (TRUE)</strong>. Si el tag es 0, el contacto está abierto y no pasa corriente.</p>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">TABLA DE VERDAD</div>
+        <table class="el-table">
+          <tr><th>Tag (variable)</th><th>Contacto</th><th>Corriente</th></tr>
+          <tr><td class="off">0 (FALSE)</td><td class="off">Abierto</td><td class="off">NO pasa</td></tr>
+          <tr><td class="on">1 (TRUE)</td><td class="on">Cerrado</td><td class="on">SÍ pasa</td></tr>
+        </table>
+        <p style="margin-top:10px">En el mundo físico equivale a:</p>
+        <p>• Pulsador de marcha (normalmente abierto)</p>
+        <p>• Sensor inductivo activo en alto</p>
+        <p>• Final de carrera de confirmación</p>
+      </div>
+      <div class="el-block full">
+        <div class="el-block-title">EJEMPLO PRÁCTICO</div>
+        <p>Rung: <span style="color:var(--cyan)">──[PB_MARCHA]──[PROTECCION_OK]──(MOTOR)──</span></p>
+        <p style="margin-top:8px">El motor arranca solo si el pulsador de marcha está pulsado (PB_MARCHA = 1) Y la protección no ha disparado (PROTECCION_OK = 1). Cualquier condición en 0 abre el circuito.</p>
+        <div class="tip-box">
+          <span class="tip-icon">&#128161;</span>
+          <span><strong>Naming:</strong> usa nombres descriptivos como PB_MARCHA, SENSOR_FIN, NIVEL_MAX. Facilita el mantenimiento y el diagnóstico de averías.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: colocar un NO Contact</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     CONTACTO NC
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-nc">
+  <span class="level-pill" style="color:var(--cyan);border-color:var(--cyan);">NIVEL 1 — BÁSICO</span>
+  <div class="section-title" style="color:var(--yellow)">Contacto NC — Normalmente Cerrado</div>
+  <div class="section-subtitle">Conduce por defecto y se abre cuando su variable se activa. Esencial en lógica de seguridad.</div>
+
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--yellow)">&#x2014;|/|&#x2014;</div>
+      <div>
+        <div class="el-card-title">NC Contact / XIO (Examine If Open)</div>
+        <div class="el-card-sub">IEC 61131-3 · CONTACTO NORMALMENTE CERRADO</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">DEFINICIÓN</div>
+        <div class="el-diagram">
+          <svg width="200" height="70" viewBox="0 0 200 70">
+            <line x1="0" y1="35" x2="70" y2="35" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="80" y1="20" x2="80" y2="50" stroke="#1e3a5a" stroke-width="2.5"/>
+            <line x1="120" y1="20" x2="120" y2="50" stroke="#1e3a5a" stroke-width="2.5"/>
+            <line x1="72" y1="48" x2="128" y2="22" stroke="#f0c030" stroke-width="2"/>
+            <line x1="130" y1="35" x2="200" y2="35" stroke="#1e3a5a" stroke-width="2"/>
+            <text x="100" y="65" fill="#f0c030" font-size="10" text-anchor="middle">TAG = 1 → ABRE</text>
+          </svg>
+        </div>
+        <p>Conduce corriente cuando su variable vale <strong style="color:var(--yellow)">0 (FALSE)</strong>. Se ABRE (corta) cuando el tag = 1. Lógica inversa.</p>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">TABLA DE VERDAD</div>
+        <table class="el-table">
+          <tr><th>Tag (variable)</th><th>Contacto</th><th>Corriente</th></tr>
+          <tr><td class="off">0 (FALSE)</td><td class="on">Cerrado</td><td class="on">SÍ pasa</td></tr>
+          <tr><td class="on">1 (TRUE)</td><td class="off">Abierto</td><td class="off">NO pasa</td></tr>
+        </table>
+        <p style="margin-top:10px">En el mundo físico equivale a:</p>
+        <p>• Seta de emergencia (abre cuando se pulsa)</p>
+        <p>• Protección térmica de motor (abre al disparar)</p>
+        <p>• Final de carrera de límite de seguridad</p>
+      </div>
+      <div class="el-block full">
+        <div class="el-block-title">PRINCIPIO FAIL-SAFE</div>
+        <p>Los dispositivos de seguridad se cablean NC en la realidad. Así, si el cable se rompe o hay un fallo, la señal pasa a 0 → el contacto NC abre → la máquina para. <strong style="color:var(--yellow)">El fallo siempre provoca la parada</strong>, no el arranque.</p>
+        <div class="tip-box warn">
+          <span class="tip-icon">⚠️</span>
+          <span><strong>Error común:</strong> cablear las setas de emergencia como NO. Si el cable se rompe, la seta "no funciona" pero no para nada. Siempre NC para seguridad.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: crear lógica de paro de emergencia</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     BOBINA COIL
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-coil">
+  <span class="level-pill" style="color:var(--cyan);border-color:var(--cyan);">NIVEL 1 — BÁSICO</span>
+  <div class="section-title" style="color:var(--cyan)">Bobina de Salida — COIL</div>
+  <div class="section-subtitle">La instrucción de salida básica. Escribe el resultado del rung en una variable o activa una salida física.</div>
+
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--cyan)">&#x2014;( )&#x2014;</div>
+      <div>
+        <div class="el-card-title">Output Coil / OTE (Output Energize)</div>
+        <div class="el-card-sub">IEC 61131-3 · BOBINA DE SALIDA</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">DEFINICIÓN</div>
+        <p>Escribe el estado del rung en su variable. Si el rung conduce → tag = 1. Si no conduce → tag = 0. Se evalúa en cada ciclo de scan.</p>
+        <p style="margin-top:10px">Siempre va al final (derecha) del rung. Nunca en el medio.</p>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">COMPORTAMIENTO</div>
+        <table class="el-table">
+          <tr><th>Rung</th><th>Bobina (tag)</th></tr>
+          <tr><td class="on">Conduce (corriente)</td><td class="on">Tag = 1 (ON)</td></tr>
+          <tr><td class="off">No conduce</td><td class="off">Tag = 0 (OFF)</td></tr>
+        </table>
+        <div class="tip-box warn" style="margin-top:12px">
+          <span class="tip-icon">⚠️</span>
+          <span>No uses el mismo tag en dos bobinas COIL. El segundo rung sobrescribirá al primero en cada scan. Usa SET/RESET si necesitas controlar desde varios puntos.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: rung básico NO → COIL</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     SERIE / AND
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-serie">
+  <span class="level-pill" style="color:var(--green);border-color:var(--green);">NIVEL 2 — COMBINATORIA</span>
+  <div class="section-title" style="color:var(--green)">Contactos en Serie — Función AND</div>
+  <div class="section-subtitle">Múltiples condiciones que deben cumplirse TODAS a la vez para activar la salida.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--green)">A · B</div>
+      <div>
+        <div class="el-card-title">Lógica AND — Contactos en serie</div>
+        <div class="el-card-sub">TODAS LAS CONDICIONES DEBEN SER VERDADERAS</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">DIAGRAMA</div>
+        <div class="el-diagram">
+          <svg width="340" height="70" viewBox="0 0 340 70">
+            <line x1="0" y1="35" x2="60" y2="35" stroke="#00e870" stroke-width="2"/>
+            <line x1="70" y1="20" x2="70" y2="50" stroke="#00e870" stroke-width="2.5"/>
+            <line x1="110" y1="20" x2="110" y2="50" stroke="#00e870" stroke-width="2.5"/>
+            <line x1="110" y1="35" x2="170" y2="35" stroke="#00e870" stroke-width="2"/>
+            <line x1="180" y1="20" x2="180" y2="50" stroke="#00e870" stroke-width="2.5"/>
+            <line x1="220" y1="20" x2="220" y2="50" stroke="#00e870" stroke-width="2.5"/>
+            <line x1="220" y1="35" x2="305" y2="35" stroke="#00e870" stroke-width="2"/>
+            <circle cx="320" cy="35" r="15" fill="none" stroke="#00e870" stroke-width="2"/>
+            <text x="90" y="65" fill="#00c8f0" font-size="9" text-anchor="middle">A</text>
+            <text x="200" y="65" fill="#00c8f0" font-size="9" text-anchor="middle">B</text>
+            <text x="320" y="65" fill="#00e870" font-size="9" text-anchor="middle">Y</text>
+          </svg>
+        </div>
+        <p>La salida Y = 1 SOLO si A = 1 Y B = 1. Cualquier contacto abierto corta el circuito.</p>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">TABLA DE VERDAD</div>
+        <table class="el-table">
+          <tr><th>A</th><th>B</th><th>Salida Y</th></tr>
+          <tr><td class="off">0</td><td class="off">0</td><td class="off">0</td></tr>
+          <tr><td class="on">1</td><td class="off">0</td><td class="off">0</td></tr>
+          <tr><td class="off">0</td><td class="on">1</td><td class="off">0</td></tr>
+          <tr><td class="on">1</td><td class="on">1</td><td class="on">1</td></tr>
+        </table>
+      </div>
+      <div class="el-block full">
+        <div class="el-block-title">EJEMPLO REAL</div>
+        <p><span style="color:var(--cyan)">──[PB_MARCHA]──[TAPA_CERRADA]──[NIVEL_ACEITE_OK]──(MOTOR_1)──</span></p>
+        <p style="margin-top:8px">El motor solo arranca si se pulsa marcha, la tapa de seguridad está cerrada Y el nivel de aceite es correcto. Basta con que una condición falle para parar el arranque.</p>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: dos contactos en serie</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     PARALELO / OR
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-paralelo">
+  <span class="level-pill" style="color:var(--green);border-color:var(--green);">NIVEL 2 — COMBINATORIA</span>
+  <div class="section-title" style="color:var(--green)">Contactos en Paralelo — Función OR</div>
+  <div class="section-subtitle">Varias condiciones alternativas: basta con que UNA sea verdadera para activar la salida.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--green)">A + B</div>
+      <div>
+        <div class="el-card-title">Lógica OR — Contactos en paralelo</div>
+        <div class="el-card-sub">AL MENOS UNA CONDICIÓN DEBE SER VERDADERA</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">DIAGRAMA</div>
+        <div class="el-diagram">
+          <svg width="300" height="90" viewBox="0 0 300 90">
+            <line x1="0" y1="45" x2="50" y2="45" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="50" y1="25" x2="50" y2="65" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="50" y1="25" x2="70" y2="25" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="80" y1="12" x2="80" y2="38" stroke="#00e870" stroke-width="2.5"/>
+            <line x1="120" y1="12" x2="120" y2="38" stroke="#00e870" stroke-width="2.5"/>
+            <line x1="120" y1="25" x2="250" y2="25" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="50" y1="65" x2="70" y2="65" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="80" y1="52" x2="80" y2="78" stroke="#1e3a5a" stroke-width="2.5"/>
+            <line x1="120" y1="52" x2="120" y2="78" stroke="#1e3a5a" stroke-width="2.5"/>
+            <line x1="120" y1="65" x2="250" y2="65" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="250" y1="25" x2="250" y2="65" stroke="#1e3a5a" stroke-width="2"/>
+            <line x1="250" y1="45" x2="275" y2="45" stroke="#1e3a5a" stroke-width="2"/>
+            <circle cx="285" cy="45" r="10" fill="none" stroke="#1e3a5a" stroke-width="2"/>
+            <text x="100" y="10" fill="#00c8f0" font-size="9" text-anchor="middle">A</text>
+            <text x="100" y="88" fill="#00c8f0" font-size="9" text-anchor="middle">B</text>
+          </svg>
+        </div>
+        <p>La salida = 1 si A = 1 OR B = 1 (o ambas). Útil para varias fuentes de arranque o condiciones alternativas.</p>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">TABLA DE VERDAD</div>
+        <table class="el-table">
+          <tr><th>A</th><th>B</th><th>Salida</th></tr>
+          <tr><td class="off">0</td><td class="off">0</td><td class="off">0</td></tr>
+          <tr><td class="on">1</td><td class="off">0</td><td class="on">1</td></tr>
+          <tr><td class="off">0</td><td class="on">1</td><td class="on">1</td></tr>
+          <tr><td class="on">1</td><td class="on">1</td><td class="on">1</td></tr>
+        </table>
+      </div>
+      <div class="el-block full">
+        <div class="el-block-title">EJEMPLO REAL</div>
+        <p>Semáforo de peatones: el verde se enciende si el pulsador local A está activo OR el pulsador remoto B está activo. Cualquiera de los dos basta.</p>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: contactos en paralelo</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     SET / RST
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-set-rst">
+  <span class="level-pill" style="color:var(--green);border-color:var(--green);">NIVEL 2 — COMBINATORIA</span>
+  <div class="section-title" style="color:var(--green)">Enclavamiento — SET y RESET</div>
+  <div class="section-subtitle">Memorizar el estado de una salida aunque la condición de arranque desaparezca. El equivalente digital del relé de enclavamiento.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div>
+        <div class="el-card-sym" style="color:var(--green);font-size:12px">─(S)─ / ─(R)─</div>
+      </div>
+      <div>
+        <div class="el-card-title">Set Coil + Reset Coil — Latch / Unlatch</div>
+        <div class="el-card-sub">ENCLAVAMIENTO CONTROLADO POR DOS CONDICIONES</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block full">
+        <div class="el-block-title">CONCEPTO</div>
+        <p>El enclavamiento es el circuito de control más importante de la automatización. Permite arrancar un motor con un pulso breve (pulsador de marcha) y mantenerlo encendido aunque se suelte el pulsador.</p>
+        <p style="margin-top:8px">En Ladder se implementa con SET y RESET:</p>
+        <p style="margin-top:8px;color:var(--cyan)">Rung 1: ──[PB_MARCHA]──(S: MOTOR)──  ← Un pulso enciende</p>
+        <p style="margin-top:4px;color:var(--red)">Rung 2: ──[PB_PARO]────(R: MOTOR)──  ← Un pulso apaga</p>
+        <p style="margin-top:8px">MOTOR queda en 1 hasta que se active PB_PARO, aunque PB_MARCHA ya no esté pulsado.</p>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">COMPORTAMIENTO SET</div>
+        <table class="el-table">
+          <tr><th>Rung SET</th><th>Variable</th></tr>
+          <tr><td class="on">Conduce (pulso)</td><td class="on">Tag = 1 (queda)</td></tr>
+          <tr><td class="off">No conduce</td><td class="on">Tag = 1 (mantiene)</td></tr>
+        </table>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">COMPORTAMIENTO RESET</div>
+        <table class="el-table">
+          <tr><th>Rung RST</th><th>Variable</th></tr>
+          <tr><td class="on">Conduce (pulso)</td><td class="off">Tag = 0 (queda)</td></tr>
+          <tr><td class="off">No conduce</td><td class="off">Tag = 0 (mantiene)</td></tr>
+        </table>
+      </div>
+      <div class="el-block full">
+        <div class="tip-box danger">
+          <span class="tip-icon">⚠️</span>
+          <span><strong>Prioridad RST:</strong> si SET y RST del mismo tag se evalúan en el mismo ciclo de scan, el RST gana (se evalúa después). Diseña siempre para que no ocurran a la vez.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: circuito de enclavamiento</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     FLANCOS P / N
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-flancos">
+  <span class="level-pill" style="color:var(--green);border-color:var(--green);">NIVEL 2 — COMBINATORIA</span>
+  <div class="section-title" style="color:var(--orange)">Detección de Flancos — P y N</div>
+  <div class="section-subtitle">Detectar el instante exacto de cambio de una señal, no su estado sostenido.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--orange)">|P| / |N|</div>
+      <div>
+        <div class="el-card-title">Rising Edge (P) y Falling Edge (N)</div>
+        <div class="el-card-sub">UN SOLO CICLO DE SCAN DE DURACIÓN</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">FLANCO POSITIVO — P</div>
+        <div class="el-diagram">
+          <svg width="220" height="70" viewBox="0 0 220 70">
+            <text x="10" y="14" fill="#4a6a8a" font-size="9">Señal A:</text>
+            <line x1="40" y1="50" x2="80" y2="50" stroke="#00c8f0" stroke-width="2"/>
+            <line x1="80" y1="50" x2="80" y2="20" stroke="#00c8f0" stroke-width="2"/>
+            <line x1="80" y1="20" x2="160" y2="20" stroke="#00c8f0" stroke-width="2"/>
+            <line x1="160" y1="20" x2="160" y2="50" stroke="#00c8f0" stroke-width="2"/>
+            <line x1="160" y1="50" x2="220" y2="50" stroke="#00c8f0" stroke-width="2"/>
+            <text x="10" y="40" fill="#4a6a8a" font-size="9">Salida P:</text>
+            <line x1="40" y1="60" x2="80" y2="60" stroke="#ff8820" stroke-width="2"/>
+            <line x1="80" y1="60" x2="80" y2="45" stroke="#ff8820" stroke-width="2"/>
+            <line x1="80" y1="45" x2="95" y2="45" stroke="#ff8820" stroke-width="2"/>
+            <line x1="95" y1="45" x2="95" y2="60" stroke="#ff8820" stroke-width="2"/>
+            <line x1="95" y1="60" x2="220" y2="60" stroke="#ff8820" stroke-width="2"/>
+            <text x="85" y="69" fill="#ff8820" font-size="8" text-anchor="middle">1 scan</text>
+          </svg>
+        </div>
+        <p>Activo durante <strong style="color:var(--orange)">un solo ciclo de scan</strong> en el flanco 0→1 de la señal. Independiente de cuánto dure la señal en 1.</p>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">CUÁNDO USAR CADA UNO</div>
+        <p><strong style="color:var(--orange)">Flanco P (subida):</strong></p>
+        <p>• Registrar el primer pulso de un pulsador</p>
+        <p>• Incrementar contador sin rebotes</p>
+        <p>• Disparar acción puntual al activar sensor</p>
+        <p style="margin-top:8px"><strong style="color:var(--purple)">Flanco N (bajada):</strong></p>
+        <p>• Registrar suelta de pulsador</p>
+        <p>• Detectar fin de movimiento</p>
+        <p>• Cambiar paso de secuencia al terminar</p>
+      </div>
+      <div class="el-block full">
+        <div class="tip-box">
+          <span class="tip-icon">&#128161;</span>
+          <span>Los flancos no mantienen la salida. Combínalos con SET para acciones persistentes: el flanco P dispara el SET, y el resultado queda memorizado hasta el RST.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: contador con flanco P</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     TON
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-ton">
+  <span class="level-pill" style="color:var(--purple);border-color:var(--purple);">NIVEL 3 — TEMPORIZADORES</span>
+  <div class="section-title" style="color:var(--purple)">TON — Retardo de Conexión</div>
+  <div class="section-subtitle">Activar una salida después de que la condición lleva activa un tiempo determinado. El temporizador más usado en automatización.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--purple);font-size:11px">&#9633;TON&#9633;</div>
+      <div>
+        <div class="el-card-title">Timer On-Delay (TON)</div>
+        <div class="el-card-sub">IEC 61131-3 · BLOQUE DE FUNCIÓN</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">PINES Y PARÁMETROS</div>
+        <table class="el-table">
+          <tr><th>Pin</th><th>Tipo</th><th>Función</th></tr>
+          <tr><td style="color:var(--cyan)">IN</td><td>BOOL entrada</td><td>Habilita el conteo</td></tr>
+          <tr><td style="color:var(--cyan)">PT</td><td>TIME preset</td><td>Tiempo hasta activar Q</td></tr>
+          <tr><td style="color:var(--green)">Q</td><td>BOOL salida</td><td>TRUE cuando ET ≥ PT</td></tr>
+          <tr><td style="color:var(--textdim)">ET</td><td>TIME salida</td><td>Tiempo transcurrido</td></tr>
+        </table>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">CRONOGRAMA</div>
+        <div class="el-diagram">
+          <svg width="240" height="90" viewBox="0 0 240 90">
+            <text x="4" y="14" fill="#4a6a8a" font-size="8">IN:</text>
+            <line x1="20" y1="30" x2="50" y2="30" stroke="#1e3a5a" stroke-width="1.5"/>
+            <line x1="50" y1="30" x2="50" y2="15" stroke="#00c8f0" stroke-width="1.5"/>
+            <line x1="50" y1="15" x2="160" y2="15" stroke="#00c8f0" stroke-width="1.5"/>
+            <line x1="160" y1="15" x2="160" y2="30" stroke="#00c8f0" stroke-width="1.5"/>
+            <line x1="160" y1="30" x2="240" y2="30" stroke="#1e3a5a" stroke-width="1.5"/>
+            <text x="4" y="55" fill="#4a6a8a" font-size="8">ET:</text>
+            <line x1="20" y1="65" x2="50" y2="65" stroke="#1e3a5a" stroke-width="1.5"/>
+            <line x1="50" y1="65" x2="110" y2="40" stroke="#a060ff" stroke-width="1.5"/>
+            <line x1="110" y1="40" x2="160" y2="40" stroke="#a060ff" stroke-width="1.5"/>
+            <line x1="160" y1="40" x2="160" y2="65" stroke="#a060ff" stroke-width="1.5"/>
+            <line x1="160" y1="65" x2="240" y2="65" stroke="#1e3a5a" stroke-width="1.5"/>
+            <text x="4" y="85" fill="#4a6a8a" font-size="8">Q:</text>
+            <line x1="20" y1="82" x2="110" y2="82" stroke="#1e3a5a" stroke-width="1.5"/>
+            <line x1="110" y1="82" x2="110" y2="72" stroke="#00e870" stroke-width="1.5"/>
+            <line x1="110" y1="72" x2="160" y2="72" stroke="#00e870" stroke-width="1.5"/>
+            <line x1="160" y1="72" x2="160" y2="82" stroke="#00e870" stroke-width="1.5"/>
+            <line x1="160" y1="82" x2="240" y2="82" stroke="#1e3a5a" stroke-width="1.5"/>
+            <line x1="110" y1="35" x2="110" y2="90" stroke="#4a6a8a" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="80" y="90" fill="#a060ff" font-size="7" text-anchor="middle">← PT →</text>
+          </svg>
+        </div>
+      </div>
+      <div class="el-block full">
+        <div class="el-block-title">CÓMO USARLO EN EL SIMULADOR</div>
+        <p><strong style="color:var(--bright)">1. Coloca el TON como salida de un rung.</strong> La entrada del rung (contactos) conecta al pin IN del TON.</p>
+        <p style="margin-top:6px"><strong style="color:var(--bright)">2. En otro rung, usa T1.Q como contacto NO.</strong> El contacto T1.Q cierra cuando el temporizador completa PT ms.</p>
+        <p style="margin-top:6px;color:var(--cyan)">Rung 1: ──[PB_MARCHA]──(TON T1 PT=5000ms)──</p>
+        <p style="margin-top:4px;color:var(--cyan)">Rung 2: ──[T1.Q]──(MOTOR_ARRANQUE)──</p>
+        <div class="tip-box">
+          <span class="tip-icon">&#128161;</span>
+          <span>Si IN cae a 0 antes de completar PT, el contador ET se reinicia a 0. El motor solo arranca si el pulsador se mantiene el tiempo suficiente.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: temporizador TON con T1.Q</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     TOF
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-tof">
+  <span class="level-pill" style="color:var(--purple);border-color:var(--purple);">NIVEL 3 — TEMPORIZADORES</span>
+  <div class="section-title" style="color:var(--purple)">TOF — Retardo de Desconexión</div>
+  <div class="section-subtitle">Mantener una salida activa durante un tiempo después de que la condición de entrada desaparece.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--purple);font-size:11px">&#9633;TOF&#9633;</div>
+      <div>
+        <div class="el-card-title">Timer Off-Delay (TOF)</div>
+        <div class="el-card-sub">IEC 61131-3 · Q = 1 INMEDIATO, SE APAGA TRAS PT</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">DIFERENCIA CON TON</div>
+        <table class="el-table">
+          <tr><th></th><th>TON</th><th>TOF</th></tr>
+          <tr><td>IN → 1</td><td class="off">Empieza conteo</td><td class="on">Q = 1 inmediato</td></tr>
+          <tr><td>ET = PT</td><td class="on">Q = 1</td><td class="off">Q = 0</td></tr>
+          <tr><td>IN → 0</td><td class="off">ET = 0, Q = 0</td><td class="off">Empieza conteo</td></tr>
+        </table>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">APLICACIONES TÍPICAS</div>
+        <p>• <strong style="color:var(--bright)">Ventilador de enfriamiento:</strong> sigue corriendo PT segundos después de parar el motor principal.</p>
+        <p style="margin-top:8px">• <strong style="color:var(--bright)">Alumbrado escalonado:</strong> la luz sigue encendida PT ms después de salir de la zona.</p>
+        <p style="margin-top:8px">• <strong style="color:var(--bright)">Electroválvula de purga:</strong> sigue abierta para vaciar el cilindro tras el paro de la prensa.</p>
+        <div class="tip-box warn">
+          <span class="tip-icon">⚠️</span>
+          <span>Si reactivas IN durante el conteo de desconexión, el TOF cancela el conteo y Q vuelve a 1. El timer sólo arranca cuando IN está definitivamente en 0.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: ventilador con TOF</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     TP
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-tp">
+  <span class="level-pill" style="color:var(--purple);border-color:var(--purple);">NIVEL 3 — TEMPORIZADORES</span>
+  <div class="section-title" style="color:var(--purple)">TP — Pulso de Duración Fija</div>
+  <div class="section-subtitle">Genera un pulso de exactamente PT milisegundos a partir de cualquier señal, sin importar su duración.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--purple);font-size:11px">&#9633;TP&#9633;</div>
+      <div>
+        <div class="el-card-title">Timer Pulse (TP) — No retriggerable</div>
+        <div class="el-card-sub">IEC 61131-3 · PULSO DE DURACIÓN EXACTA</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block full">
+        <div class="el-block-title">COMPORTAMIENTO</div>
+        <p>En el flanco de subida (0→1) de IN, Q = 1 durante exactamente PT ms. Aunque IN siga en 1 más tiempo, Q se apaga al llegar a PT. Si se activa IN de nuevo <strong style="color:var(--orange)">mientras Q sigue activo</strong>, se ignora.</p>
+        <p style="margin-top:10px"><strong style="color:var(--bright)">Aplicaciones:</strong> timbre escolar, pulso de apertura de cerradura, señal de habilitación breve, marcado de inicio de ciclo.</p>
+        <div class="tip-box">
+          <span class="tip-icon">&#128161;</span>
+          <span>El TP garantiza que la duración del pulso de salida siempre sea exactamente PT, independientemente de la señal de entrada. Ideal cuando necesitas consistencia temporal.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: pulso con TP</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     CTU
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-ctu">
+  <span class="level-pill" style="color:var(--yellow);border-color:var(--yellow);">NIVEL 4 — CONTADORES</span>
+  <div class="section-title" style="color:var(--yellow)">CTU — Contador Ascendente</div>
+  <div class="section-subtitle">Contar eventos (piezas, pulsos, ciclos) hasta alcanzar un valor objetivo.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--yellow);font-size:11px">&#9633;CTU&#9633;</div>
+      <div>
+        <div class="el-card-title">Counter Up (CTU)</div>
+        <div class="el-card-sub">IEC 61131-3 · CUENTA FLANCOS POSITIVOS</div>
+      </div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">PINES</div>
+        <table class="el-table">
+          <tr><th>Pin</th><th>Función</th></tr>
+          <tr><td style="color:var(--cyan)">CU</td><td>Pulso de cuenta (flanco ↑)</td></tr>
+          <tr><td style="color:var(--cyan)">R</td><td>Reset — pone CV = 0</td></tr>
+          <tr><td style="color:var(--cyan)">PV</td><td>Valor preset (objetivo)</td></tr>
+          <tr><td style="color:var(--green)">Q</td><td>TRUE cuando CV ≥ PV</td></tr>
+          <tr><td style="color:var(--textdim)">CV</td><td>Valor actual del contador</td></tr>
+        </table>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">EJEMPLO: CONTEO DE PRODUCCIÓN</div>
+        <p style="color:var(--cyan)">Rung 1: ──[SENSOR_PIEZA]──(CTU C1 PV=100)──</p>
+        <p style="color:var(--cyan);margin-top:4px">Rung 2: ──[C1.Q]──(ALARMA_LOTE)──</p>
+        <p style="color:var(--cyan);margin-top:4px">Rung 3: ──[PB_RESET]──(R: C1.Q)──</p>
+        <p style="margin-top:10px">Cada pieza que pasa activa el sensor (flanco P). Al llegar a 100 piezas, C1.Q = 1 y activa la alarma de lote completo. El operario pulsa RESET para reiniciar.</p>
+        <div class="tip-box warn">
+          <span class="tip-icon">⚠️</span>
+          <span>Diseña siempre el rung de reset. Sin él, el contador llega a PV y Q queda permanentemente en 1.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: contar piezas con CTU</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     CTD / CTUD — RESUMIDO
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-ctd">
+  <span class="level-pill" style="color:var(--yellow);border-color:var(--yellow);">NIVEL 4 — CONTADORES</span>
+  <div class="section-title" style="color:var(--yellow)">CTD — Contador Descendente</div>
+  <div class="section-subtitle">Cuenta hacia cero desde un valor inicial. Activa Q cuando CV llega a 0.</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--yellow);font-size:11px">&#9633;CTD&#9633;</div>
+      <div><div class="el-card-title">Counter Down (CTD)</div><div class="el-card-sub">CUENTA REGRESIVA DESDE PV HASTA 0</div></div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block">
+        <div class="el-block-title">PINES</div>
+        <table class="el-table">
+          <tr><th>Pin</th><th>Función</th></tr>
+          <tr><td style="color:var(--cyan)">CD</td><td>Pulso de decremento (flanco ↑)</td></tr>
+          <tr><td style="color:var(--cyan)">LD</td><td>Load — carga CV = PV</td></tr>
+          <tr><td style="color:var(--cyan)">PV</td><td>Valor de carga inicial</td></tr>
+          <tr><td style="color:var(--green)">Q</td><td>TRUE cuando CV ≤ 0</td></tr>
+          <tr><td style="color:var(--textdim)">CV</td><td>Valor actual</td></tr>
+        </table>
+      </div>
+      <div class="el-block">
+        <div class="el-block-title">APLICACIÓN: STOCK</div>
+        <p>Almacén con 50 unidades. Cada salida decrementa CV. Q activa alarma de stock bajo.</p>
+        <p style="margin-top:8px;color:var(--orange)">⚠️ Siempre carga (LD) antes de empezar. Si CV comienza en 0, Q ya está activo.</p>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: contador CTD</a>
+</div>
+
+<div class="section-page" id="page-ctud">
+  <span class="level-pill" style="color:var(--yellow);border-color:var(--yellow);">NIVEL 4 — CONTADORES</span>
+  <div class="section-title" style="color:var(--yellow)">CTUD — Contador Bidireccional</div>
+  <div class="section-subtitle">Puede contar hacia arriba y hacia abajo. Dos salidas: Q (lleno) y QD (vacío).</div>
+  <div class="el-card">
+    <div class="el-card-head">
+      <div class="el-card-sym" style="color:var(--yellow);font-size:11px">&#9633;CTUD&#9633;</div>
+      <div><div class="el-card-title">Counter Up/Down (CTUD)</div><div class="el-card-sub">GESTIÓN DE ALMACÉN / BUFFER INDUSTRIAL</div></div>
+    </div>
+    <div class="el-card-body">
+      <div class="el-block full">
+        <div class="el-block-title">APLICACIÓN TÍPICA: BUFFER ENTRE MÁQUINAS</div>
+        <p>Sensor de entrada (CU) incrementa al entrar piezas. Sensor de salida (CD) decrementa al salir. Q = TRUE cuando buffer lleno (CV ≥ PV): para la máquina de entrada. QD = TRUE cuando vacío (CV ≤ 0): para la máquina de salida.</p>
+        <div class="tip-box danger">
+          <span class="tip-icon">⚠️</span>
+          <span>Nunca actives CU y CD simultáneamente. Diseña la lógica con interlocks (un NC del otro) para que sean mutuamente excluyentes.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <a href="index.html" class="btn-practice">&#9655; Practicar: CTUD en buffer</a>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     AUTOMATISMOS
+════════════════════════════════════════════════════════════ -->
+<div class="section-page" id="page-auto">
+  <span class="level-pill" style="color:var(--orange);border-color:var(--orange);">AUTOMATISMOS TÍPICOS</span>
+  <div class="section-title" style="color:var(--orange)">Patrones de Automatización</div>
+  <div class="section-subtitle">Circuitos de control que aparecen repetidamente en la industria. Aprende el patrón, aplícalo a cualquier máquina.</div>
+
+  <div class="auto-card">
+    <div class="auto-card-head">
+      <div class="auto-number">01</div>
+      <div><h3>Enclavamiento Básico — Motor ON/OFF</h3><p>El circuito de arranque y paro más usado en la industria</p></div>
+    </div>
+    <div class="auto-body">
+      <p>Permite arrancar un motor con un pulso breve de marcha y pararlo con un pulso breve de paro, sin mantener pulsados los botones.</p>
+      <p style="color:var(--cyan);margin:8px 0">Rung 1: ──[PB_MARCHA]──[PB_PARO_NC]──[PROTECCION_NC]──(SET: MOTOR)──</p>
+      <p style="color:var(--red)">Rung 2: ──[PB_PARO]──────────────────────────────────(RST: MOTOR)──</p>
+      <p style="color:var(--cyan);margin-top:4px">Rung 3: ──[MOTOR]──────────────────────────────────────(CONTACTOR_K1)──</p>
+      <ol class="auto-steps" style="margin-top:12px">
+        <li>PB_MARCHA activa SET → MOTOR = 1 (queda memorizado)</li>
+        <li>Se suelta PB_MARCHA → MOTOR sigue en 1 gracias al latch</li>
+        <li>CONTACTOR_K1 = 1 → la bobina física cierra el circuito de potencia</li>
+        <li>PB_PARO activa RST → MOTOR = 0 → contactor se desactiva</li>
+        <li>PROTECCION dispara → NC abre → RST activa → motor para</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="auto-card">
+    <div class="auto-card-head">
+      <div class="auto-number">02</div>
+      <div><h3>Arranque Estrella-Triángulo</h3><p>Reducir la corriente de arranque de motores grandes</p></div>
+    </div>
+    <div class="auto-body">
+      <p>El motor arranca en estrella (baja tensión) durante un tiempo fijo con TON, y luego conmuta a triángulo (plena tensión). Reduce la corriente de arranque al 33%.</p>
+      <ol class="auto-steps">
+        <li>PB_MARCHA → SET: MARCHA_GENERAL</li>
+        <li>MARCHA_GENERAL → activa CONTACTOR_ESTRELLA + temporizador TON (PT = 8 s)</li>
+        <li>Al completarse TON → T1.Q = 1 → RST: CONTACTOR_ESTRELLA</li>
+        <li>T1.Q activa CONTACTOR_TRIANGULO → motor en plena potencia</li>
+        <li>Interlock: NC de ESTRELLA en el rung de TRIANGULO y viceversa</li>
+      </ol>
+      <div class="tip-box warn">
+        <span class="tip-icon">⚠️</span>
+        <span>Añade siempre un pequeño retardo entre la desconexión de ESTRELLA y la conexión de TRIANGULO para evitar cortocircuito de los contactores.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="auto-card">
+    <div class="auto-card-head">
+      <div class="auto-number">03</div>
+      <div><h3>Semáforo de Peatones</h3><p>Secuencia temporizada de estados con TON</p></div>
+    </div>
+    <div class="auto-body">
+      <p>Al pulsar el botón de paso de peatones, se inicia una secuencia: rojo de vehículos → verde de peatones (PT=15s) → rojo de peatones → verde de vehículos.</p>
+      <ol class="auto-steps">
+        <li>PB_PEATON (flanco P) → SET: CICLO_ACTIVO</li>
+        <li>CICLO_ACTIVO → ROJO_VEHICULOS = 1 + TON T1 (PT = 3 s)</li>
+        <li>T1.Q → VERDE_PEATON = 1 + TON T2 (PT = 15 s)</li>
+        <li>T2.Q → RST: VERDE_PEATON + ROJO_PEATON + TON T3 (PT = 3 s)</li>
+        <li>T3.Q → RST: CICLO_ACTIVO → vuelve al estado inicial</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="auto-card">
+    <div class="auto-card-head">
+      <div class="auto-number">04</div>
+      <div><h3>Conteo de Producción con Alarma</h3><p>CTU para gestionar lotes y avisar al operario</p></div>
+    </div>
+    <div class="auto-body">
+      <p>Contar piezas que salen de una línea. Al llegar al tamaño del lote, activar alarma y parar la línea. El operario retira el lote y pulsa RESET para continuar.</p>
+      <ol class="auto-steps">
+        <li>SENSOR_PIEZA (flanco P) → CTU C1 (PV = 50)</li>
+        <li>C1.Q → ALARMA_LOTE (luz + zumbador)</li>
+        <li>C1.Q → RST: MOTOR_LINEA (para la cinta)</li>
+        <li>Operario retira lote y pulsa PB_RESET</li>
+        <li>PB_RESET → RST: C1.CV (contador a cero) + SET: MOTOR_LINEA</li>
+      </ol>
+    </div>
+  </div>
+
+  <a href="index.html" class="btn-practice" style="margin-top:8px">&#9655; Ir al Simulador y practicar</a>
+</div>
+
+</div><!-- #content -->
+</div><!-- #layout -->
+
+<script>
+// ── Navigation ────────────────────────────────────────────────
+const navBtns = document.querySelectorAll('.nav-item[data-page]');
+const pages   = document.querySelectorAll('.section-page');
+
+function showPage(pageId) {
+  pages.forEach(p => p.classList.remove('active'));
+  navBtns.forEach(b => b.classList.remove('active', 'g', 'p', 'y', 'o'));
+
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+
+  const btn = document.querySelector(`.nav-item[data-page="${pageId}"]`);
+  if (btn) {
+    const lvl = btn.closest('.nav-section')?.querySelector('.nav-level')?.textContent || '';
+    const cat  = lvl.includes('2') ? 'g' : lvl.includes('3') ? 'p' : lvl.includes('4') ? 'y' : lvl.includes('AUTO') ? 'o' : '';
+    btn.classList.add('active');
+    if (cat) btn.classList.add(cat);
+  }
+
+  document.getElementById('content').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+navBtns.forEach(btn => {
+  btn.addEventListener('click', () => showPage(btn.dataset.page));
+});
+
+// Set intro as default active
+document.querySelector('.nav-item[data-page="intro"]').classList.add('active');
+
+// Handle hash navigation from main app (e.g. temario.html#ton)
+if (location.hash) {
+  const key = location.hash.replace('#', '');
+  showPage(key);
+}
+</script>
+</body>
+</html>
