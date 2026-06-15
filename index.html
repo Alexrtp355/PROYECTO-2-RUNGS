@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RUNGS — IEC 61131-3 Ladder Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <div class="logo">RUNGS <span>IEC 61131-3</span></div>
+    <div class="toolbar">
+      <button id="btn-run"  class="tb-btn run">&#9654; RUN</button>
+      <button id="btn-stop" class="tb-btn stop" disabled>&#9646;&#9646; STOP</button>
+      <button id="btn-step" class="tb-btn">&#9655; STEP</button>
+      <div class="sep"></div>
+      <button id="btn-add-rung" class="tb-btn">+ RUNG</button>
+      <button id="btn-add-branch" class="tb-btn" title="Agregar rama paralela (OR) al último rung seleccionado">⇕ RAMA</button>
+      <button id="btn-clear"    class="tb-btn danger">&#128465; CLEAR</button>
+      <div class="sep"></div>
+      <label class="scan-label">Scan: <span id="scan-ms">50</span> ms
+        <input type="range" id="scan-speed" min="20" max="500" value="50" step="10" />
+      </label>
+      <div class="scan-count">Ciclo: <span id="cycle-count">0</span></div>
+    </div>
+  </header>
+
+  <div id="workspace">
+
+    <!-- LEFT PANEL: Palette -->
+    <aside id="palette-panel">
+      <div class="panel-title">ELEMENTOS</div>
+
+      <div class="palette-group">
+        <div class="group-label">CONTACTOS</div>
+        <button class="pal-btn" data-type="NO" title="Contacto Normalmente Abierto">
+          <span class="iec-sym no">&#x2014;| |&#x2014;</span>
+          <span class="pal-name">NO Contact</span>
+        </button>
+        <button class="pal-btn" data-type="NC" title="Contacto Normalmente Cerrado">
+          <span class="iec-sym nc">&#x2014;|/|&#x2014;</span>
+          <span class="pal-name">NC Contact</span>
+        </button>
+        <button class="pal-btn" data-type="P" title="Flanco Positivo (Rising Edge)">
+          <span class="iec-sym pe">&#x2014;|P|&#x2014;</span>
+          <span class="pal-name">P Contact ↑</span>
+        </button>
+        <button class="pal-btn" data-type="N" title="Flanco Negativo (Falling Edge)">
+          <span class="iec-sym ne">&#x2014;|N|&#x2014;</span>
+          <span class="pal-name">N Contact ↓</span>
+        </button>
+      </div>
+
+      <div class="palette-group">
+        <div class="group-label">BOBINAS</div>
+        <button class="pal-btn" data-type="COIL" title="Bobina de Salida">
+          <span class="iec-sym coil">&#x2014;( )&#x2014;</span>
+          <span class="pal-name">Coil</span>
+        </button>
+        <button class="pal-btn" data-type="SET" title="Bobina Set (Latch)">
+          <span class="iec-sym set">&#x2014;(S)&#x2014;</span>
+          <span class="pal-name">Set Coil</span>
+        </button>
+        <button class="pal-btn" data-type="RST" title="Bobina Reset">
+          <span class="iec-sym rst">&#x2014;(R)&#x2014;</span>
+          <span class="pal-name">Reset Coil</span>
+        </button>
+        <button class="pal-btn" data-type="NCOIL" title="Bobina Negada">
+          <span class="iec-sym ncoil">&#x2014;(/)&#x2014;</span>
+          <span class="pal-name">NOT Coil</span>
+        </button>
+      </div>
+
+      <div class="palette-group">
+        <div class="group-label">TEMPORIZADORES</div>
+        <button class="pal-btn fb-btn" data-type="TON" title="Temporizador Retardo ON">
+          <span class="iec-sym fb">TON</span>
+          <span class="pal-name">On Delay</span>
+        </button>
+        <button class="pal-btn fb-btn" data-type="TOF" title="Temporizador Retardo OFF">
+          <span class="iec-sym fb">TOF</span>
+          <span class="pal-name">Off Delay</span>
+        </button>
+        <button class="pal-btn fb-btn" data-type="TP" title="Temporizador Pulso">
+          <span class="iec-sym fb">TP</span>
+          <span class="pal-name">Pulse</span>
+        </button>
+      </div>
+
+      <div class="palette-group">
+        <div class="group-label">CONTADORES</div>
+        <button class="pal-btn fb-btn" data-type="CTU" title="Contador Ascendente">
+          <span class="iec-sym fb">CTU</span>
+          <span class="pal-name">Count Up</span>
+        </button>
+        <button class="pal-btn fb-btn" data-type="CTD" title="Contador Descendente">
+          <span class="iec-sym fb">CTD</span>
+          <span class="pal-name">Count Down</span>
+        </button>
+        <button class="pal-btn fb-btn" data-type="CTUD" title="Contador Bidireccional">
+          <span class="iec-sym fb">CTUD</span>
+          <span class="pal-name">Count Up/Down</span>
+        </button>
+      </div>
+
+      <div class="palette-group">
+        <div class="group-label">MODO DE EDICIÓN</div>
+        <button class="pal-btn active-mode" id="btn-mode-add" data-mode="add">+ Agregar</button>
+        <button class="pal-btn" id="btn-mode-del" data-mode="delete">✕ Borrar</button>
+        <button class="pal-btn" id="btn-mode-par" data-mode="parallel">⇕ Paralelo</button>
+        <button class="pal-btn" id="btn-mode-branch" data-mode="branch">⑂ Rama OR</button>
+      </div>
+
+      <div id="selected-info">
+        <div class="sel-title">HERRAMIENTA ACTIVA</div>
+        <div id="sel-type-display">— ninguna —</div>
+      </div>
+    </aside>
+
+    <!-- CENTER: Ladder + Timing canvases -->
+    <main id="center-panel">
+      <div id="ladder-wrap">
+        <canvas id="ladderCanvas"></canvas>
+        <div id="empty-hint">Presiona <strong>+ RUNG</strong> para agregar un rung</div>
+      </div>
+      <div id="timing-wrap">
+        <div class="tw-header">
+          <span>DIAGRAMA DE TIEMPO</span>
+          <button id="btn-clear-history" class="tiny-btn">Limpiar</button>
+        </div>
+        <canvas id="timingCanvas"></canvas>
+      </div>
+
+      <!-- CONTEXTUAL THEORY PANEL -->
+      <div id="theory-panel" data-cat="intro">
+        <div id="theory-header">
+          <span class="th-dot"></span>
+          <span id="theory-context-label">Introducción al Ladder IEC 61131-3</span>
+          <div class="theory-header-right">
+            <button id="btn-temario" onclick="window.open('temario.html','_blank')" class="tiny-btn temario-btn">&#128218; Ver Temario</button>
+            <button id="btn-theory-toggle" class="tiny-btn">&#9660;</button>
+          </div>
+        </div>
+        <div id="theory-body">
+          <div class="theory-card">
+            <div class="tc-head"><span class="tc-icon">&#127919;</span> OBJETIVO</div>
+            <p id="tc-obj-text"></p>
+          </div>
+          <div class="theory-card">
+            <div class="tc-head"><span class="tc-icon">&#128214;</span> EL ELEMENTO</div>
+            <p id="tc-el-text"></p>
+          </div>
+          <div class="theory-card">
+            <div class="tc-head"><span class="tc-icon">&#9889;</span> EN SIMULACIÓN</div>
+            <p id="tc-sim-text"></p>
+          </div>
+          <div class="theory-card">
+            <div class="tc-head"><span class="tc-icon">&#9888;</span> CONSEJO / ERROR TÍPICO</div>
+            <p id="tc-con-text"></p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT PANEL: Variable Monitor -->
+    <aside id="monitor-panel">
+      <div class="panel-title">MONITOR DE VARIABLES</div>
+      <table id="tag-table">
+        <thead>
+          <tr>
+            <th>Tag</th>
+            <th>Valor</th>
+            <th>Forzar</th>
+          </tr>
+        </thead>
+        <tbody id="tag-tbody"></tbody>
+      </table>
+      <div class="monitor-hint">Las variables aparecen al agregar elementos</div>
+    </aside>
+
+  </div><!-- #workspace -->
+
+</div><!-- #app -->
+
+<!-- MODAL: Tag Name / Properties -->
+<div id="modal-overlay" class="hidden">
+  <div id="modal-box">
+    <div id="modal-title">Configurar Elemento</div>
+    <div id="modal-body">
+      <label>Nombre de Tag (variable):
+        <input type="text" id="modal-tag" placeholder="ej. PB1, LAMP, T_MOTOR" autocomplete="off" />
+      </label>
+      <label id="modal-preset-row" class="hidden">Valor Preset (PT/PV):
+        <input type="number" id="modal-preset" value="5000" min="1" />
+        <span id="modal-preset-unit">ms</span>
+      </label>
+      <label id="modal-reset-row" class="hidden">Tag de Reset:
+        <input type="text" id="modal-reset-tag" placeholder="ej. RST1" />
+      </label>
+    </div>
+    <div id="modal-footer">
+      <button id="modal-cancel" class="tb-btn">Cancelar</button>
+      <button id="modal-ok"     class="tb-btn run">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx-menu" class="hidden">
+  <button id="ctx-edit">&#9998; Editar</button>
+  <button id="ctx-add-parallel">&#8645; Agregar en Paralelo</button>
+  <button id="ctx-add-after">&#8594; Insertar después</button>
+  <button id="ctx-add-branch">⑂ Agregar Rama OR</button>
+  <button id="ctx-delete">&#128465; Eliminar</button>
+  <button id="ctx-del-branch">&#128465; Eliminar Rama</button>
+  <button id="ctx-del-rung">&#128465; Eliminar Rung</button>
+</div>
+
+<script src="plc.js"></script>
+<script src="renderer.js"></script>
+<script src="theory.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
